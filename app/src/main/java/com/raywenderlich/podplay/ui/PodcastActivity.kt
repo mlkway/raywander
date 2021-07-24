@@ -77,7 +77,7 @@ class PodcastActivity : AppCompatActivity() {
   private lateinit var mediaBrowser: MediaBrowserCompat
   private var mediaControllerCallback: MediaControllerCallback? = null
   private var progressAnimator: ValueAnimator? = null
-  private var episodeDuration: Long = 0
+  private var episodeDuration: Long = 0L
   private var playerSpeed: Float = 1.0f
   private var draggingScrubber: Boolean = false
   private var mediaPlayer: MediaPlayer? = null
@@ -92,19 +92,22 @@ class PodcastActivity : AppCompatActivity() {
     podcastViewModel.load()
     podcastViewModel.episode.observe(this){
 
-    }
-    initMediaBrowser()
-    setupControls()
-    updateControls()
-    if (mediaBrowser.isConnected) {
+      initMediaBrowser()
+      setupControls(it)
+      updateControls(it)
+      if (mediaBrowser.isConnected) {
 
-      if (MediaControllerCompat.getMediaController(this) == null) {
-        registerMediaController(mediaBrowser.sessionToken)
+        if (MediaControllerCompat.getMediaController(this) == null) {
+          registerMediaController(mediaBrowser.sessionToken)
+        }
+        updateControlsFromController()
+      } else {
+        mediaBrowser.connect()
       }
-      updateControlsFromController()
-    } else {
-      mediaBrowser.connect()
+
+
     }
+
 
 
   }
@@ -123,18 +126,18 @@ class PodcastActivity : AppCompatActivity() {
   }
 
 
-  private fun updateControls() {
+  private fun updateControls(randomPod: RandomPod) {
     // 1
-    databinding.episodeTitleTextView.text = podcastViewModel.episode.value?.title
+    databinding.episodeTitleTextView.text = randomPod.title
     // 2
 
 
-    databinding.episodeDescTextView.text = """"""
+    databinding.episodeDescTextView.text = randomPod.description
     databinding.episodeDescTextView.movementMethod = ScrollingMovementMethod()
     // 3
 
     Glide.with(this)
-      .load(podcastViewModel.episode.value?.image)
+      .load(randomPod.image)
       .into(databinding.episodeImageView)
 
 
@@ -152,7 +155,7 @@ class PodcastActivity : AppCompatActivity() {
   }
 
 
-  private fun togglePlayPause() {
+  private fun togglePlayPause(randomPod: RandomPod) {
     playOnPrepare = true
 
     val controller = MediaControllerCompat.getMediaController(this)
@@ -160,10 +163,10 @@ class PodcastActivity : AppCompatActivity() {
       if (controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
         controller.transportControls.pause()
       } else {
-        podcastViewModel.episode.value?.let { startPlaying(it) }
+        startPlaying(randomPod)
       }
     } else {
-      podcastViewModel.episode.value?.let { startPlaying(it) }
+      startPlaying(randomPod)
     }
   }
 
@@ -179,9 +182,9 @@ class PodcastActivity : AppCompatActivity() {
   }
 
 
-  private fun setupControls() {
+  private fun setupControls(randomPod: RandomPod) {
     databinding.playToggleButton.setOnClickListener {
-      togglePlayPause()
+      togglePlayPause(randomPod)
     }
 
     databinding.forwardButton.setOnClickListener {
@@ -282,7 +285,7 @@ class PodcastActivity : AppCompatActivity() {
 
   private fun updateControlsFromMetadata(metadata: MediaMetadataCompat) {
     episodeDuration = metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
-    databinding.endTimeTextView.text = "111"
+    databinding.endTimeTextView.text = episodeDuration.toString()
     databinding.seekBar.max = episodeDuration.toInt()
   }
 
@@ -309,8 +312,7 @@ class PodcastActivity : AppCompatActivity() {
       return
     }
 
-    progressAnimator = ValueAnimator.ofInt(
-      progress, episodeDuration.toInt())
+    progressAnimator = ValueAnimator.ofInt(progress, episodeDuration.toInt())
     progressAnimator?.let { animator ->
       animator.duration = timeRemaining.toLong()
       animator.interpolator = LinearInterpolator()
@@ -330,8 +332,9 @@ class PodcastActivity : AppCompatActivity() {
     val controller = MediaControllerCompat.getMediaController(this)
     val bundle = Bundle()
     bundle.putString(MediaMetadataCompat.METADATA_KEY_TITLE, episodeViewData.title)
-    bundle.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, episodeViewData.id)
+    bundle.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, episodeViewData.podcast?.publisher)
     bundle.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, episodeViewData.image)
+
 
     controller.transportControls.playFromUri(Uri.parse(episodeViewData.audio), bundle)
   }

@@ -5,17 +5,10 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="@android:color/black">
+  android:background="@android:color/white">
 
 
-  <androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/headerView"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:background="#eeeeee"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+
 
     <ImageView
       android:id="@+id/episodeImageView"
@@ -40,7 +33,7 @@
         app:layout_constraintStart_toEndOf="@+id/episodeImageView"
         app:layout_constraintTop_toTopOf="@+id/episodeImageView"/>
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+
 
   <TextView
       android:id="@+id/episodeDescTextView"
@@ -52,7 +45,6 @@
       app:layout_constraintBottom_toTopOf="@+id/playerControls"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/headerView"
       tools:text="Episode description"/>
 
   <androidx.constraintlayout.widget.ConstraintLayout
@@ -142,4 +134,5 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintTop_toTopOf="@+id/seekBar" />
   </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
